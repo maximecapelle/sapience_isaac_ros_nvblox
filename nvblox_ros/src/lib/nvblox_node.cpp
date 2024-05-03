@@ -29,7 +29,6 @@
 #include <vector>
 
 #include <nvblox_ros_common/qos.hpp>
-
 #include "nvblox_ros/visualization.hpp"
 
 namespace nvblox
@@ -257,7 +256,7 @@ void NvbloxNode::subscribeToTopics()
     const auto pointcloud_qos = rclcpp::QoS(
       rclcpp::KeepLast(kQueueSize), parseQosString(pointcloud_qos_str_));
     pointcloud_sub_ = create_subscription<sensor_msgs::msg::PointCloud2>(
-      "pointcloud", pointcloud_qos,
+      "/lidar/points", pointcloud_qos,
       std::bind(
         &NvbloxNode::pointcloudCallback, this,
         std::placeholders::_1));
