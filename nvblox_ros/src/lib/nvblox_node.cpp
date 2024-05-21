@@ -223,8 +223,8 @@ void NvbloxNode::subscribeToTopics()
   if (use_depth_) {
     // Subscribe to synchronized depth + cam_info topics
     const auto depth_qos = parseQosString(depth_qos_str_);
-    depth_sub_.subscribe(this, "depth/image", depth_qos);
-    depth_camera_info_sub_.subscribe(this, "depth/camera_info", depth_qos);
+    depth_sub_.subscribe(this, "/d455/depth_image", depth_qos);
+    depth_camera_info_sub_.subscribe(this, "/d455/stereo_camera/left/camera_info", depth_qos);
 
     timesync_depth_.reset(
       new message_filters::Synchronizer<time_policy_t>(
@@ -238,8 +238,8 @@ void NvbloxNode::subscribeToTopics()
   if (use_color_) {
     // Subscribe to synchronized color + cam_info topics
     const auto color_qos = parseQosString(color_qos_str_);
-    color_sub_.subscribe(this, "color/image", color_qos);
-    color_camera_info_sub_.subscribe(this, "color/camera_info", color_qos);
+    color_sub_.subscribe(this, "/d455/color/image", color_qos);
+    color_camera_info_sub_.subscribe(this, "/d455/color/camera_info", color_qos);
 
     timesync_color_.reset(
       new message_filters::Synchronizer<time_policy_t>(
