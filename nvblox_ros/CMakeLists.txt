@@ -70,7 +70,8 @@ add_library(${PROJECT_NAME}_lib SHARED
   src/lib/visualization.cpp
   src/lib/transformer.cpp
   src/lib/mapper_initialization.cpp
-  src/lib/nvblox_node.cpp
+  # src/lib/nvblox_node.cpp
+  src/lib/nvblox_node_sapience.cpp
   src/lib/nvblox_human_node.cpp
 )
 target_link_libraries(${PROJECT_NAME}_lib nvblox::nvblox_lib nvblox::nvblox_eigen pthread)
@@ -108,10 +109,15 @@ endif()
 ############
 # BINARIES #
 ############
-add_executable(nvblox_node
-  src/nvblox_node_main.cpp
+# add_executable(nvblox_node
+#   src/nvblox_node_main.cpp
+# )
+# target_link_libraries(nvblox_node ${PROJECT_NAME}_lib)
+
+add_executable(nvblox_node_sapience
+  src/nvblox_node_main_sapience.cpp
 )
-target_link_libraries(nvblox_node ${PROJECT_NAME}_lib)
+target_link_libraries(nvblox_node_sapience ${PROJECT_NAME}_lib)
 
 add_executable(nvblox_human_node
   src/nvblox_human_node_main.cpp
@@ -139,9 +145,13 @@ install(
 
 # Install nodes which live in lib for some reason.
 install(
-  TARGETS nvblox_node nvblox_human_node
+  TARGETS nvblox_node_sapience nvblox_human_node
   DESTINATION lib/${PROJECT_NAME}
 )
+# install(
+#   TARGETS nvblox_node nvblox_human_node
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 # Install tests
 install(DIRECTORY
