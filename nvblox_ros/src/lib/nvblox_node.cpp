@@ -50,8 +50,6 @@ NvbloxNode::NvbloxNode(const rclcpp::NodeOptions & options, const std::string & 
 
   // Initialize the MultiMapper with the underlying dynamic/static mappers.
   initializeMultiMapper();
-  RCLCPP_INFO_STREAM(get_logger(), "WTF, WHY DON'T YOU SHOW ME THE PRINT STATEMENT: " << node_name);
-
 
   // Setup interactions with ROS
   subscribeToTopics();
@@ -108,12 +106,9 @@ void NvbloxNode::getParameters()
   mapping_type_ =
     mapping_type_from_string(declare_parameter<std::string>("mapping_type", "static_tsdf"), this);
   esdf_mode_ = declare_parameter<bool>("esdf_2d", true) ? EsdfMode::k2D : EsdfMode::k3D;
-  multi_mapper_params_.esdf_2d_min_height =
-    declare_parameter<float>("esdf_2d_min_height", MultiMapper::kDefaultEsdf2dMinHeight);
-  multi_mapper_params_.esdf_2d_max_height =
-    declare_parameter<float>("esdf_2d_max_height", MultiMapper::kDefaultEsdf2dMaxHeight);
-  multi_mapper_params_.esdf_slice_height =
-    declare_parameter<float>("esdf_slice_height", MultiMapper::kDefaultEsdf2dSliceHeight);
+  multi_mapper_params_.esdf_2d_min_height = declare_parameter<float>("esdf_2d_min_height", MultiMapper::kDefaultEsdf2dMinHeight);
+  multi_mapper_params_.esdf_2d_max_height = declare_parameter<float>("esdf_2d_max_height", MultiMapper::kDefaultEsdf2dMaxHeight);
+  multi_mapper_params_.esdf_slice_height =  declare_parameter<float>("esdf_slice_height", MultiMapper::kDefaultEsdf2dSliceHeight);
   multi_mapper_params_.connected_mask_component_size_threshold =
     declare_parameter<int>(
     "connected_mask_component_size_threshold",
@@ -277,43 +272,57 @@ void NvbloxNode::subscribeToTopics()
 void NvbloxNode::advertiseTopics()
 {
   RCLCPP_INFO_STREAM(get_logger(), "NvbloxNode::advertiseTopics()");
-  // Mesh publishers
-  mesh_publisher_ = create_publisher<nvblox_msgs::msg::Mesh>("~/mesh", 1);
-  mesh_marker_publisher_ =
-    create_publisher<visualization_msgs::msg::MarkerArray>("~/mesh_marker", 1);
-  // Static esdf
+
+  declare_parameter<bool>("min_publishers", minimum_publishers_);
+  // Static esdf ***
   static_esdf_pointcloud_publisher_ =
     create_publisher<sensor_msgs::msg::PointCloud2>("~/static_esdf_pointcloud", 1);
-  static_map_slice_publisher_ =
-    create_publisher<nvblox_msgs::msg::DistanceMapSlice>("~/static_map_slice", 1);
-  // Static occupancy
-  static_occupancy_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/static_occupancy", 1);
   // Debug outputs
   slice_bounds_publisher_ =
     create_publisher<visualization_msgs::msg::Marker>("~/map_slice_bounds", 1);
-  back_projected_depth_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/back_projected_depth", 1);
-  // Dynamic occupancy
-  dynamic_occupancy_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/dynamic_occupancy", 1);
-  // Dynamic esdf
-  dynamic_esdf_pointcloud_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/dynamic_esdf_pointcloud", 1);
-  dynamic_map_slice_publisher_ =
-    create_publisher<nvblox_msgs::msg::DistanceMapSlice>("~/dynamic_map_slice", 1);
-  // Debug output for dynamics
-  dynamic_points_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/dynamic_points", 1);
-  dynamic_depth_frame_overlay_publisher_ =
-    create_publisher<sensor_msgs::msg::Image>("~/dynamic_depth_frame_overlay", 1);
-  freespace_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/freespace", 1);
-  // Combined esdf
-  combined_esdf_pointcloud_publisher_ =
-    create_publisher<sensor_msgs::msg::PointCloud2>("~/combined_esdf_pointcloud", 1);
-  combined_map_slice_publisher_ =
-    create_publisher<nvblox_msgs::msg::DistanceMapSlice>("~/combined_map_slice", 1);
+  // Static occupancy
+  static_occupancy_publisher_ =
+    create_publisher<sensor_msgs::msg::PointCloud2>("~/static_occupancy", 1);
+  // Distance map for planning
+  static_map_slice_publisher_ =
+      create_publisher<nvblox_msgs::msg::DistanceMapSlice>("~/static_map_slice", 1);
+
+  RCLCPP_INFO_STREAM(get_logger(), "Minimum publishers: " << (minimum_publishers_ ? "true" : "false"));
+  if (!minimum_publishers_) {
+    // Mesh publishers - Deactivated by compute_mesh
+    mesh_publisher_ = create_publisher<nvblox_msgs::msg::Mesh>("~/mesh", 1);
+    mesh_marker_publisher_ =
+      create_publisher<visualization_msgs::msg::MarkerArray>("~/mesh_marker", 1);
+
+    // Back projected depth - Using Depth image??
+    back_projected_depth_publisher_ =
+      create_publisher<sensor_msgs::msg::PointCloud2>("~/back_projected_depth", 1);
+
+    // Dynamic Stuff - Deactivated if mapping_type_ is not dynamic
+    dynamic_occupancy_publisher_ =
+      create_publisher<sensor_msgs::msg::PointCloud2>("~/dynamic_occupancy", 1);
+    // Dynamic esdf
+    dynamic_esdf_pointcloud_publisher_ =
+      create_publisher<sensor_msgs::msg::PointCloud2>("~/dynamic_esdf_pointcloud", 1);
+    dynamic_map_slice_publisher_ =
+      create_publisher<nvblox_msgs::msg::DistanceMapSlice>("~/dynamic_map_slice", 1);
+    // Debug output for dynamics
+    dynamic_points_publisher_ =
+      create_publisher<sensor_msgs::msg::PointCloud2>("~/dynamic_points", 1);
+    dynamic_depth_frame_overlay_publisher_ =
+      create_publisher<sensor_msgs::msg::Image>("~/dynamic_depth_frame_overlay", 1);
+
+    // Freespace - Also requires dynamic mapping
+    freespace_publisher_ =
+      create_publisher<sensor_msgs::msg::PointCloud2>("~/freespace", 1);
+
+    // Combined esdf Stuff - Also requires dynamic mapping
+    combined_esdf_pointcloud_publisher_ =
+      create_publisher<sensor_msgs::msg::PointCloud2>("~/combined_esdf_pointcloud", 1);
+    combined_map_slice_publisher_ =
+      create_publisher<nvblox_msgs::msg::DistanceMapSlice>("~/combined_map_slice", 1);
+  }
+
 }
 
 void NvbloxNode::advertiseServices()

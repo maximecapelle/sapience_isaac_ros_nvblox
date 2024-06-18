@@ -37,22 +37,10 @@ int main(int argc, char * argv[])
   // CUDA call.
   nvblox::warmupCuda();
 
-  // Parameters to pass, esdf range, slice height, namespace publishers
-  rclcpp::NodeOptions options1;
-  std::string node_name1 = "nvblox_1";
-
-  rclcpp::NodeOptions options2;
-  std::string node_name2 = "nvblox_2";
-
   rclcpp::executors::MultiThreadedExecutor exec;
-  std::shared_ptr<nvblox::NvbloxNode> node1(new nvblox::NvbloxNode(options1, node_name1))
-  std::shared_ptr<nvblox::NvbloxNode> node2(new nvblox::NvbloxNode(options2, node_name2))
-  RCLCPP_INFO(rclcpp::get_logger("NvbloxNode"), "NvbloxNode instances created successfully! \n\n\n\n\n\n")
-  std::cout << "Press ENTER to spin nodes...";
-  std::cin.get();
+  std::shared_ptr<nvblox::NvbloxNode> node(new nvblox::NvbloxNode());
 
-  exec.add_node(node1);
-  exec.add_node(node2);
+  exec.add_node(node);
   exec.spin();
 
   rclcpp::shutdown();
