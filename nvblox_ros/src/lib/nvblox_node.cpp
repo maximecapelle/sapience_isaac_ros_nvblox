@@ -34,10 +34,7 @@
 namespace nvblox
 {
 
-NvbloxNode::NvbloxNode(
-  const rclcpp::NodeOptions & options,
-  const std::string & node_name)
-: Node(node_name, options), transformer_(this)
+NvbloxNode::NvbloxNode(const rclcpp::NodeOptions & options, const std::string & node_name) : Node(node_name, options), transformer_(this)
 {
   // Get parameters first (stuff below depends on parameters)
   getParameters();
@@ -53,6 +50,8 @@ NvbloxNode::NvbloxNode(
 
   // Initialize the MultiMapper with the underlying dynamic/static mappers.
   initializeMultiMapper();
+  RCLCPP_INFO_STREAM(get_logger(), "WTF, WHY DON'T YOU SHOW ME THE PRINT STATEMENT: " << node_name);
+
 
   // Setup interactions with ROS
   subscribeToTopics();
