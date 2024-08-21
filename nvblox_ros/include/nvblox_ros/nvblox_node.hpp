@@ -307,7 +307,7 @@ protected:
   float slice_visualization_side_length_ = 10.0f;
 
   // ROS settings & update throttles
-  std::string global_frame_ = "odom";
+  std::string global_frame_ = "map";
   /// Pose frame to use if using transform topics.
   std::string pose_frame_ = "base_link";
   float max_depth_update_hz_ = 30.0f;
